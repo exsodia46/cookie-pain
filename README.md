@@ -1,86 +1,71 @@
 import pygame
-import random
+import math #needed for square root function
+isBig = False
 
+#initializes Pygame
 pygame.init()
-screen = pygame.display.set_mode((1200,800)) #screen is a rectangle, not square!
-pygame.display.set_caption("fish mouse imput")
+print(pygame.font.get_fonts())
+pygame.display.set_caption("Cookie Clicker")#sets the window title
+screen = pygame.display.set_mode((400,400))#creates game screen
 
-#mouse input
+#player variables
 xpos = 0
 ypos = 0
-mousePos = (xpos, ypos)
+mousePos = (xpos, ypos) #variable mousePos stores TWO numbers
+numClicks = 0
 
-background = 1
+#circle variables: circX and circY are the coordinates of the center (where it's drawn), and the radius is how big it is
+circX = 50
+circY = 50
+radius = 100
 
-fishieXpos = []
-fishieYpos = []
+CookiePic = pygame.image.load("skull.png")
+CookieRect = CookiePic.get_rect(topleft=(100,100))
 
-#load images
-castleImg = pygame.image.load("castle.png").convert_alpha()
-pygame.Surface.set_colorkey (castleImg, [255,255,255])
-castleImg2 = pygame.image.load("castle2.png").convert_alpha()
-pygame.Surface.set_colorkey (castleImg2, [255,255,255])
+font = pygame.font.Font('freesansbold.ttf', 32)
+text1 = font.render('score:', False, (0, 200, 200))
+text2 = font.render(str(int(numClicks)), 1, (0, 200, 200))
 
-plantImg = pygame.image.load("plants.png").convert_alpha()
-pygame.Surface.set_colorkey (plantImg, [255,255,255])
-plantImg2 = pygame.image.load("plants2.png").convert_alpha()
-pygame.Surface.set_colorkey (plantImg2, [255,255,255])
+#gameloop###################################################
+while True:
+#event queue (bucket that holds stuff that happens in game and passes to one of the sections below)
+    event = pygame.event.wait()
 
-fishImg = pygame.image.load("fish.png").convert_alpha()
-pygame.Surface.set_colorkey (fishImg, [255,0,255])
+    if event.type == pygame.QUIT: #close game window
+        break
 
-
-while 1: #game loop###########################################################
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            
-        print(mousePos) #this is to help you know where to set these boundaries
+    if event.type == pygame.MOUSEBUTTONDOWN: #check if clicked
+      if math.sqrt((mousePos[0] - 200)**2+(mousePos[1] - 200)**2)<radius:
+            numClicks+=1
+            print("adding score")
+      print("CLICK")
+      CookieRect.y+=20
+    if CookieRect.y > 100:
+        CookieRect.y -=5
+    if event.type == pygame.MOUSEMOTION: #check if mouse moved
+        mousePos = event.pos #refreshes mouse position
+        #print("mouse position: (",mousePos[0]," , ",mousePos[1],")")
+        if math.sqrt((mousePos[0] - 200)**2+(mousePos[1] - 200)**2)<radius:
+            isBig = True
+        else:
+            isBig = False
+ 
+#render section---------------------------------------------
+    screen.fill((100, 100, 100)) #wipe screen (without this, things smear)
+    screen.blit(CookiePic, CookieRect)
+    #pygame.draw.circle(screen, (200, 0, 200), (200,200), radius)    
+    text2 = font.render(str(int(numClicks)), 1, (0, 200, 200))
+    screen.blit(text1, (10, 10))
+    screen.blit(text2, (110, 10))
+    
+    #print("clicks:", numClicks) #uncomment this once collision is set up
         
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            
-            #background selection
-            if mousePos[0]>1000 and mousePos[0] < 1200 and mousePos[1]>50 and mousePos[1]<225:
-               background = 1 #castle
-            elif mousePos[0]>1000 and mousePos[0] < 1200 and mousePos[1]>225 and mousePos[1]<425:
-                background = 2 #plants
-                
-            #fish selection
-            elif mousePos[0]>25 and mousePos[0] < 200 and mousePos[1]>50 and mousePos[1]<150:
-               fishieXpos.append(random.randrange(250, 900))
-               fishieYpos.append(random.randrange(50,750))
-         
-        if event.type == pygame.MOUSEMOTION:
-            mousePos = event.pos        
+    pygame.display.flip()
     
 
-    #render section------------------------------
-    
-    screen.fill((0,0,0))# Clear the screen
+#end game loop##############################################
 
-    #fill in "water" for tank
-    pygame.draw.rect(screen, (100, 100, 200), (200, 0, 800, 800)) #make sure you know what these numbers do!
-
-    #draw the lines on the screen
-    pygame.draw.line(screen, (255,255,255), (200, 0), (200, 800), 2) #make sure you know what these numbers do!
-    pygame.draw.line(screen, (255,255,255), (1000, 0), (1000, 800), 2)
-    
-    #draw background image
-    if background == 1:
-        screen.blit(castleImg, (240, 140))
-    elif background ==2: 
-        screen.blit(plantImg, (240, 140))
-    
-    #draw fishies!
-    for i in range(len(fishieXpos)):
-        screen.blit(fishImg, (fishieXpos[i], fishieYpos[i]))
-        
-    #show sidebar images
-    screen.blit(castleImg2, (1000, 50))
-    screen.blit(plantImg2, (1010, 250))
-    screen.blit(fishImg, (50, 50))
-    
-    pygame.display.flip()# Update the display
-
-#end of game loop###################################################################
 pygame.quit()
+
+
+
